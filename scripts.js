@@ -54,6 +54,7 @@ function handleFormSubmission(state){
     priorityEl.value = 'easy';
 
     toggleForm(false);
+    renderContent();
 }
 
 let stateToAppend = null;
@@ -77,6 +78,7 @@ submitModal.addEventListener('click',()=>{
     // handle submission
     handleFormSubmission(stateToAppend);
     stateToAppend = null;
+    renderContent();
 });
 
 const addNewTask = document.querySelectorAll('.add-new');
@@ -89,20 +91,30 @@ addNewTask.forEach((addNew)=>{
         console.log(JSON.parse(localStorage.getItem('myTasks')));
         stateToAppend = targetState;
         toggleForm(true);
+        renderContent();
 
     });
 });
 
+function updateTasks(){
+  const container = JSON.parse(localStorage.getItem('myTasks')) || [];
+  container.forEach
+}
+
 function renderContent(){
     const container = JSON.parse(localStorage.getItem('myTasks')) || [];
+    
     let pending='', ongoing='', underReview='', finished=''; 
+
+    let totalTasks = container.length;
+    let finishedCount = 0;
 
     container.forEach((task)=>{
         if(task.state == 'pending'){
             pending += `
                 <div class="task-card" draggable="true" id="${task.id}">
                     <h4>${task.title}</h4>
-                    <p class="task-desc">${task.desc} </p>
+                    <p class="task-desc">${task.desc}</p>
                     <p class="task-priority-${task.priority}">${task.priority}</p>
                 </div>
             `;
@@ -110,7 +122,7 @@ function renderContent(){
             ongoing += `
                 <div class="task-card" draggable="true" id="${task.id}">
                     <h4>${task.title}</h4>
-                    <p class="task-desc">${task.desc} </p>
+                    <p class="task-desc">${task.desc}</p>
                     <p class="task-priority-${task.priority}">${task.priority}</p>
                 </div>
             `;
@@ -118,31 +130,34 @@ function renderContent(){
             underReview += `
                 <div class="task-card" draggable="true" id="${task.id}">
                     <h4>${task.title}</h4>
-                    <p class="task-desc">${task.desc} </p>
+                    <p class="task-desc">${task.desc}</p>
                     <p class="task-priority-${task.priority}">${task.priority}</p>
                 </div>
             `;
         }else if(task.state == 'finished'){
+            finishedCount++; // ✅ count completed
             finished += `
                 <div class="task-card" draggable="true" id="${task.id}">
                     <h4>${task.title}</h4>
-                    <p class="task-desc">${task.desc} </p>
+                    <p class="task-desc">${task.desc}</p>
                     <p class="task-priority-${task.priority}">${task.priority}</p>
                 </div>
             `;
         }
     });
-    const taskContainerPending = document.getElementById('task-container-pending');
-    taskContainerPending.innerHTML = pending;
 
-    const taskContainerOngoing = document.getElementById('task-container-ongoing');
-    taskContainerOngoing.innerHTML = ongoing;
+    // ✅ Calculate progress %
+    let progress = totalTasks === 0 ? 0 : Math.round((finishedCount / totalTasks) * 100);
 
-    const taskContainerUnderReview = document.getElementById('task-container-underReview');
-    taskContainerUnderReview.innerHTML = underReview;
+    // ✅ Update UI
+    document.getElementById("progress-fill").style.width = progress + "%";
+    document.getElementById("progress-text").innerText = progress + "%";
 
-    const taskContainerFinished = document.getElementById('task-container-finished');
-    taskContainerFinished.innerHTML = finished;
+    // Existing rendering
+    document.getElementById('task-container-pending').innerHTML = pending;
+    document.getElementById('task-container-ongoing').innerHTML = ongoing;
+    document.getElementById('task-container-underReview').innerHTML = underReview;
+    document.getElementById('task-container-finished').innerHTML = finished;
 }
 
 renderContent();
@@ -155,6 +170,7 @@ function changeState(id, newState){
     }
 
     localStorage.setItem('myTasks', JSON.stringify(container));
+    renderContent();
 }
 
 // implementing the drag and drop functionality
@@ -212,6 +228,7 @@ containers.forEach(container => {
             changeState(elementBeingDragged.id, container.parentElement.getAttribute('data-state'));
 
             console.log(JSON.parse(localStorage.getItem('myTasks')));
+            renderContent();
         }
     });
 });
@@ -232,79 +249,107 @@ function getDragAfterElement(container, y){
             }
         }, { offset: Number.NEGATIVE_INFINITY }).element;
 }
+function handleTimer() {
+    let timerInterval = null;
 
-function handleTimer(){
-let time = 25 * 60;
-let timerInterval = null;
-let isRunning = false;
-let sessionCount = 0;
+    // Load from localStorage or default values
+    let time = parseInt(localStorage.getItem("time")) || 25 * 60;
+    let isRunning = localStorage.getItem("isRunning") === "true";
+    let sessionCount = parseInt(localStorage.getItem("sessionCount")) || 0; 
 
-const timerDisplay = document.getElementById("timer");
-const stateDisplay = document.getElementById("state");
-const sessionDisplay = document.getElementById("sessionCount");
-const alarm = document.getElementById("alarm");
-const container = document.querySelector(".pomodoro");
+    const timerDisplay = document.getElementById("timer");
+    const stateDisplay = document.getElementById("state");
+    const sessionDisplay = document.getElementById("sessionCount");
+    const alarm = document.getElementById("alarm");
+    const container = document.querySelector(".pomodoro");
 
-function updateDisplay() {
-    let minutes = Math.floor(time / 60);
-    let seconds = time % 60;
-    timerDisplay.textContent =
-        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-}
+    function saveState() {
+        localStorage.setItem("time", time);
+        localStorage.setItem("isRunning", isRunning);
+        localStorage.setItem("sessionCount", sessionCount);
+    }
 
-function setState(state) {
-    stateDisplay.textContent = state;
+    function updateDisplay() {
+        let minutes = Math.floor(time / 60);
+        let seconds = time % 60;
+        timerDisplay.textContent =
+            `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
 
-    container.classList.remove("running", "paused", "idle");
+    function setState(state) {
+        stateDisplay.textContent = state;
 
-    if (state === "Running") container.classList.add("running");
-    else if (state === "Paused") container.classList.add("paused");
-    else container.classList.add("idle");
-}
+        container.classList.remove("running", "paused", "idle");
 
-document.getElementById("start").onclick = () => {
-    if (isRunning) return;
+        if (state === "Running") container.classList.add("running");
+        else if (state === "Paused") container.classList.add("paused");
+        else container.classList.add("idle");
+    }
 
-    isRunning = true;
-    setState("Running");
-
-    timerInterval = setInterval(() => {
-        time--;
-        updateDisplay();
-
-        if (time <= 0) {
-            clearInterval(timerInterval);
-            alarm.play();
-
-            sessionCount++;
-            sessionDisplay.textContent = sessionCount;
-
-            isRunning = false;
-            setState("Idle");
-            time = 25 * 60;
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            time--;
             updateDisplay();
-        }
-    }, 1000);
-};
+            saveState();
 
-document.getElementById("pause").onclick = () => {
-    clearInterval(timerInterval);
-    isRunning = false;
-    setState("Paused");
-};
+            if (time <= 0) {
+                clearInterval(timerInterval);
+                alarm.play();
 
-document.getElementById("reset").onclick = () => {
-    clearInterval(timerInterval);
-    isRunning = false;
-    time = 25 * 60;
+                sessionCount++;
+                sessionDisplay.textContent = sessionCount;
+
+                isRunning = false;
+                setState("Idle");
+
+                time = 25 * 60;
+                updateDisplay();
+                saveState();
+            }
+        }, 1000);
+    }
+
+    document.getElementById("start").onclick = () => {
+        if (isRunning) return;
+
+        isRunning = true;
+        setState("Running");
+        saveState();
+
+        startTimer();
+    };
+
+    document.getElementById("pause").onclick = () => {
+        clearInterval(timerInterval);
+        isRunning = false;
+        setState("Paused");
+        saveState();
+    };
+
+    document.getElementById("reset").onclick = () => {
+        clearInterval(timerInterval);
+        isRunning = false;
+        time = 25 * 60;
+        sessionCount = 0;
+
+        updateDisplay();
+        sessionDisplay.textContent = sessionCount;
+        setState("Idle");
+        saveState();
+    };
+
+    // Initialize UI
     updateDisplay();
-    setState("Idle");
-};
+    sessionDisplay.textContent = sessionCount;
 
-// Initialize
-updateDisplay();
-setState("Idle");
+    if (isRunning) {
+        setState("Running");
+        startTimer(); // resume automatically
+    } else {
+        setState("Paused"); // if it wasn't idle before reload
+    }
 }
+
 handleTimer();
 
 
