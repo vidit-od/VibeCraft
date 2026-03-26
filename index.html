@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="navbar">
+        <h1>TO-DO LIST</h1>
+        <button id="add-Event">+</button>
+    </div>
+    <!-- <div id="task-input-form"class="hidden">
+        
+    </div> -->
+    <div class="task-display">
+        <div class="pending task-column" data-state="pending">
+            <h2 class="heading">Pending</h2>
+            <div id="task-container-pending" class="task-container">
+                
+            </div>
+            <button id="add-to-pending" class="add-new">Add new task</button>
+        </div>
+
+        <div class="ongoing task-column" data-state="ongoing">
+            <h2 class="heading">In Progress</h2>
+            <div id="task-container-ongoing" class="task-container">
+                <!-- <div class="task-card" draggable="true" id="162763">
+                    <h4>Task heading</h4>
+                    <p class="task-desc">To do so and so.... </p>
+                    <p class="task-priority-Medium">Medium</p>
+                </div> -->
+                
+            </div>
+            <button id="add-to-inProgress" class="add-new">Add new task</button>
+        </div>
+        
+        <div class="underReview task-column" data-state="underReview">
+            <h2 class="heading">Under Review</h2>
+            <div id="task-container-underReview" class="task-container">
+                
+            </div>
+            <button id="add-to-review" class="add-new">Add new task</button>
+        </div>
+        <div class="finished task-column" data-state="finished">
+            <h2 class="heading">Finished</h2>
+            <div id="task-container-finished" class="task-container">
+                
+            </div>
+            <button id="add-to-finished" class="add-new">Add new task</button>
+        </div>
+    </div>
+
+    <div id="task-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="input">    
+                <label for="task-heading">Enter the task heading:</label>
+                <input type="text" id="task-heading">
+            </div>
+
+            <div class="input">   
+                <label for="task-subheading">Enter the task description:</label>
+                <input type="text" id="task-subheading">
+            </div>
+
+            <div class="input">
+                <label for="fieldType">Priority:</label>
+                <select id="task-priority">
+                    <option value="Easy">Easy</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Hard">Hard</option>
+                </select>
+            </div>
+
+            <div class="modal-action input">
+                <button id="create-task">Submit</button>
+                <button id="close-modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="pomodoro">
+        <h2>Pomodoro Timer</h2>
+
+        <div id="timer">25:00</div>
+
+        <div class="controls">
+            <button id="start">Start</button>
+            <button id="pause">Pause</button>
+            <button id="reset">Reset</button>
+        </div>
+
+        <div class="status">
+            Status: <span id="state">Idle</span>
+        </div>
+
+        <div class="sessions">
+            Sessions Completed: <span id="sessionCount">0</span>
+        </div>
+
+        <audio id="alarm">
+            <source src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg">
+        </audio>
+    </div>
+
+
+    <!-- ============================================================
+     MUSIC PLAYER — HTML SNIPPET
+     Drop this inside your <body> where you want the player.
+     ============================================================ -->
+
+<div class="mp-root" id="musicPlayer">
+  <!-- Hidden YouTube iframe container -->
+  <div id="mp-yt-frame" style="display:none;"></div>
+
+  <!-- Album Art / Visualizer -->
+  <div class="mp-art-wrap">
+    <div class="mp-vinyl" id="mpVinyl">
+      <div class="mp-vinyl-label">
+        <span class="mp-vinyl-dot"></span>
+      </div>
+    </div>
+    <div class="mp-eq" id="mpEq">
+      <span></span><span></span><span></span><span></span><span></span>
+    </div>
+  </div>
+
+  <!-- Track Info -->
+  <div class="mp-info">
+    <p class="mp-status" id="mpStatus">READY</p>
+    <h2 class="mp-title" id="mpTitle">Select a Track</h2>
+    <p class="mp-artist" id="mpArtist">—</p>
+  </div>
+
+  <!-- Track List -->
+  <div class="mp-tracklist" id="mpTracklist">
+    <!-- Populated by JS -->
+  </div>
+
+  <!-- Controls -->
+  <div class="mp-controls">
+    <button class="mp-btn mp-prev" id="mpPrev" title="Previous">
+      <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+    </button>
+    <button class="mp-btn mp-play" id="mpPlayPause" title="Play/Pause">
+      <svg class="mp-icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      <svg class="mp-icon-pause" viewBox="0 0 24 24" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+    </button>
+    <button class="mp-btn mp-next" id="mpNext" title="Next">
+      <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zm2.5-6 8.5 6V6z" style="transform:none"/><rect x="16" y="6" width="2" height="12"/></svg>
+    </button>
+  </div>
+
+  <!-- Volume -->
+  <div class="mp-volume-row">
+    <svg class="mp-vol-icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+    <input type="range" class="mp-volume" id="mpVolume" min="0" max="100" value="75">
+    <span class="mp-vol-val" id="mpVolVal">75</span>
+  </div>
+</div>
+
+</body>
+<script src="scripts.js"></script>
+</html>
